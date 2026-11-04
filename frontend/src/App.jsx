@@ -1,5 +1,5 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
@@ -11,11 +11,25 @@ import Contact from './pages/Contact';
 import StudentLogin from './pages/StudentLogin';
 import StudentDashboard from './pages/StudentDashboard';
 
+/**
+ * ScrollToTop component: Ensures every page route navigation resets scroll to the very top (0, 0).
+ * Uses React Router's useLocation hook to accurately detect every route change.
+ */
 function ScrollToTop() {
-  const { pathname } = window.location;
-  React.useEffect(() => {
-    window.scrollTo(0, 0);
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    // Snap immediately to top of document on route navigation
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'instant'
+    });
+    // Fallback for body/documentElement scroll containers
+    if (document.documentElement) document.documentElement.scrollTop = 0;
+    if (document.body) document.body.scrollTop = 0;
   }, [pathname]);
+
   return null;
 }
 

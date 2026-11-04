@@ -236,6 +236,79 @@ img {
   transform: translateY(-2px);
 }
 
+/* =============================================================================
+   ICON HOVER EFFECTS & MICRO-INTERACTIONS
+   ============================================================================= */
+svg.lucide, .lucide {
+  transition: transform 0.25s cubic-bezier(0.2, 0, 0, 1), color 0.25s ease, filter 0.25s ease;
+}
+
+/* Standalone icon hover */
+svg.lucide:hover {
+  transform: scale(1.15);
+}
+
+/* Button icon hover reactions */
+.btn svg.lucide {
+  transition: transform 0.25s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.btn:hover svg.lucide {
+  transform: translateX(4px) scale(1.1);
+}
+
+.btn-secondary:hover svg.lucide,
+.btn-forest:hover svg.lucide,
+.btn-outline-white:hover svg.lucide {
+  transform: scale(1.15);
+}
+
+/* Navbar & Drawer link icon animations */
+.nav-link svg.lucide,
+.drawer-link svg.lucide,
+.nav-menu-btn svg.lucide {
+  transition: transform 0.25s cubic-bezier(0.2, 0, 0, 1), color 0.25s ease;
+}
+
+.nav-link:hover svg.lucide {
+  transform: translateY(-2px) scale(1.15);
+}
+
+.nav-menu-btn:hover svg.lucide {
+  transform: rotate(90deg) scale(1.12);
+}
+
+.drawer-close-btn:hover svg.lucide {
+  transform: rotate(90deg) scale(1.15);
+}
+
+.drawer-link:hover .drawer-link-icon,
+.drawer-link:hover svg.lucide {
+  transform: scale(1.2) rotate(-6deg);
+  color: var(--color-burgundy);
+}
+
+/* Card & Feature Box icon animations */
+.icon-container {
+  transition: transform 0.3s cubic-bezier(0.2, 0, 0, 1), background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.icon-container:hover,
+.heritage-card:hover .icon-container {
+  transform: translateY(-4px) scale(1.08);
+  box-shadow: 0 6px 16px rgba(113, 59, 55, 0.22);
+}
+
+.heritage-card:hover svg.lucide {
+  transform: scale(1.12);
+}
+
+/* Footer link icon animations */
+footer a:hover svg.lucide {
+  transform: translateX(4px) scale(1.18);
+  color: var(--color-gold) !important;
+}
+
 /* Badges */
 .category-badge {
   display: inline-block;

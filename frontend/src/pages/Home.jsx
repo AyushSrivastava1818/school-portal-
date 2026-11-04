@@ -232,6 +232,7 @@ export default function Home() {
                 }}
               >
                 <div
+                  className="icon-container"
                   style={{
                     width: '48px',
                     height: '48px',
@@ -242,6 +243,7 @@ export default function Home() {
                     alignItems: 'center',
                     justifyContent: 'center',
                     marginBottom: '16px',
+                    cursor: 'pointer',
                   }}
                 >
                   {item.icon}

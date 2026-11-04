@@ -206,6 +206,7 @@ export default function About() {
             ].map((item, idx) => (
               <div key={idx} className="heritage-card">
                 <div
+                  className="icon-container"
                   style={{
                     width: '42px',
                     height: '42px',
@@ -216,6 +217,7 @@ export default function About() {
                     alignItems: 'center',
                     justifyContent: 'center',
                     marginBottom: '14px',
+                    cursor: 'pointer',
                   }}
                 >
                   {item.icon}
