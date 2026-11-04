@@ -1,120 +1,305 @@
-# SchoolHub – School Information & Management Portal
+<div align="center">
 
-> **B.Tech Web Development Lab Group Project**  
-> Built with **React (Vite)**, **Python Flask**, and **PostgreSQL**.
+# 🏛️ SchoolHub — Academic Portal & Student Management System
 
----
+[![Frontend](https://img.shields.io/badge/Frontend-React%2018%20%7C%20Vite-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://reactjs.org/)
+[![Backend](https://img.shields.io/badge/Backend-Python%20%7C%20Flask-000000?style=for-the-badge&logo=flask&logoColor=white)](https://flask.palletsprojects.com/)
+[![Database](https://img.shields.io/badge/Database-PostgreSQL-336791?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Design](https://img.shields.io/badge/Design-The%20Heritage%20Edit-713B37?style=for-the-badge)](#-design-system--the-heritage-edit)
+[![Status](https://img.shields.io/badge/Build-Passing-2EA44F?style=for-the-badge)](https://github.com/AyushSrivastava1818/school-portal-)
 
-## 1. Project Architecture & Data Flow
-
-### Architecture Diagram
-```
-[ Client Browser ]
-  │
-  ├── React Components (Pages, Navigation, Forms, Cards)
-  └── Services (fetch API calls with fallback caching)
-        │
-        ▼ HTTP REST / JSON (CORS enabled)
-[ Flask Backend ] (Python 3, port 5000)
-  │
-  ├── Endpoints: /api/notices, /api/contact, /api/login, /api/student/*
-  ├── Security: Werkzeug Password Hashing (scrypt)
-  └── Driver: psycopg2 (Parameterized queries preventing SQL injection)
-        │
-        ▼ TCP Connection (port 5432)
-[ PostgreSQL Database ]
-  └── Tables: students, notices, results, attendance, enquiries
-```
-
-### Data Flow Breakdown
-1. **User Request**: User navigates pages, filters notices, submits an enquiry, or logs in.
-2. **React Fetch Call**: `frontend/src/services/api.js` dispatches an asynchronous HTTP request to `http://localhost:5000/api/*`.
-3. **Flask Route Handling**: Flask parses query parameters or JSON payloads, validates input fields, and acquires a database cursor via `psycopg2`.
-4. **Database Execution**: PostgreSQL runs parameterized SQL queries (`%s` placeholders) and returns rows mapped as Python dictionaries.
-5. **JSON Response**: Flask returns structured JSON (`{ success: true, data: [...] }`).
-6. **UI Render**: React updates component state (`useState`) and displays the updated view without reloading the page.
+**A modern, full-stack school web portal and student academic management system designed for educational institutions.**  
+*Combines an editorial public campus website with an authenticated student dashboard.*
 
 ---
 
-## 2. Technology Stack
+</div>
 
-- **Frontend**: React 18, Vite, React Router DOM, Lucide React, Vanilla CSS.
-- **Backend**: Python 3, Flask, Flask-CORS, Werkzeug.
-- **Database**: PostgreSQL with `psycopg2-binary`.
-- **Design Direction**: *"The Heritage Edit"* (Warm Ivory `#F8F5EE`, Deep Burgundy `#713B37`, Forest Green `#35483A`, Antique Gold `#B68A50`, Charcoal `#2A2824`).
+## 📌 Table of Contents
+- [System Architecture](#-system-architecture)
+- [Database Schema (Entity Relationship Diagram)](#-database-schema)
+- [Data Flow & Request Lifecycle](#-data-flow--request-lifecycle)
+- [Key Features & Modules](#-key-features--modules)
+- [Design System — "The Heritage Edit"](#-design-system--the-heritage-edit)
+- [Technology Stack](#-technology-stack)
+- [Project Directory Structure](#-project-directory-structure)
+- [Installation & Quick Start](#-installation--quick-start)
+- [REST API Reference](#-rest-api-reference)
+- [Group Member Contributions](#-group-member-contributions)
 
 ---
 
-## 3. Database Schema
+## 🏗️ System Architecture
 
-```sql
--- 1. Students
-CREATE TABLE students (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    roll_number VARCHAR(50) UNIQUE NOT NULL,
-    class_name VARCHAR(50) NOT NULL,
-    section VARCHAR(10) NOT NULL,
-    password_hash VARCHAR(255) NOT NULL
-);
+The project employs a decoupled client-server architecture. The React single-page application interacts with the Flask backend exclusively over a secure RESTful JSON API layer.
 
--- 2. Notices
-CREATE TABLE notices (
-    id SERIAL PRIMARY KEY,
-    title VARCHAR(200) NOT NULL,
-    description TEXT NOT NULL,
-    category VARCHAR(50) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+```mermaid
+flowchart TD
+    subgraph ClientLayer["🖥️ Frontend Client (React 18 + Vite)"]
+        UI["Modern Institutional UI\n(Vanilla CSS Design System)"]
+        Router["React Router DOM\n(Client-Side Route Engine)"]
+        Drawer["Slide-In Collapsible Drawer\n(Desktop + Tablet + Mobile)"]
+        APIService["api.js Service Layer\n(Fetch with Timeout & Cache Fallbacks)"]
+        UI --> Router
+        Router --> Drawer
+        Router --> APIService
+    end
 
--- 3. Results
-CREATE TABLE results (
-    id SERIAL PRIMARY KEY,
-    student_id INTEGER NOT NULL REFERENCES students(id) ON DELETE CASCADE,
-    subject VARCHAR(100) NOT NULL,
-    marks NUMERIC(5,2) NOT NULL,
-    total_marks NUMERIC(5,2) NOT NULL
-);
+    subgraph APILayer["⚙️ Backend Server (Python Flask)"]
+        FlaskRouter["Flask Application Router\n(Port 5000)"]
+        CORS["Flask-CORS Middleware\n(Cross-Origin Protection)"]
+        AuthModule["Auth Module\n(Werkzeug Scrypt Password Hashing)"]
+        Validator["Input Validation & Sanitization"]
+        DBHandler["database.py Connection Manager\n(psycopg2 Connection Pool)"]
+        
+        CORS --> FlaskRouter
+        FlaskRouter --> Validator
+        Validator --> AuthModule
+        AuthModule --> DBHandler
+    end
 
--- 4. Attendance
-CREATE TABLE attendance (
-    id SERIAL PRIMARY KEY,
-    student_id INTEGER NOT NULL REFERENCES students(id) ON DELETE CASCADE,
-    total_days INTEGER NOT NULL,
-    present_days INTEGER NOT NULL
-);
+    subgraph DataLayer["🗄️ Relational Database (PostgreSQL)"]
+        PG[(PostgreSQL Engine\nPort 5432)]
+        T_Students[("students")]
+        T_Notices[("notices")]
+        T_Results[("results")]
+        T_Attendance[("attendance")]
+        T_Enquiries[("enquiries")]
 
--- 5. Enquiries
-CREATE TABLE enquiries (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    email VARCHAR(100) NOT NULL,
-    message TEXT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+        PG --- T_Students
+        PG --- T_Notices
+        PG --- T_Results
+        PG --- T_Attendance
+        PG --- T_Enquiries
+    end
+
+    APIService <== "HTTP / JSON REST API" ==> CORS
+    DBHandler <== "TCP / Parameterized Queries (%s)" ==> PG
 ```
 
 ---
 
-## 4. Quick Start & Setup
+## 🗃️ Database Schema
 
-### 1. Database Initialization
-Make sure PostgreSQL is running on port `5432`, then run:
+All relational entities adhere to 3NF normal form with explicit foreign keys and `ON DELETE CASCADE` referential constraints.
+
+```mermaid
+erDiagram
+    students ||--o{ results : "receives"
+    students ||--o{ attendance : "records"
+    
+    students {
+        int id PK "SERIAL"
+        string name "VARCHAR(100)"
+        string roll_number "VARCHAR(50) UNIQUE"
+        string class_name "VARCHAR(50)"
+        string section "VARCHAR(10)"
+        string password_hash "VARCHAR(255)"
+    }
+
+    results {
+        int id PK "SERIAL"
+        int student_id FK "REFERENCES students(id)"
+        string subject "VARCHAR(100)"
+        numeric marks "NUMERIC(5,2)"
+        numeric total_marks "NUMERIC(5,2)"
+    }
+
+    attendance {
+        int id PK "SERIAL"
+        int student_id FK "REFERENCES students(id)"
+        int total_days "INTEGER"
+        int present_days "INTEGER"
+    }
+
+    notices {
+        int id PK "SERIAL"
+        string title "VARCHAR(200)"
+        text description "TEXT"
+        string category "VARCHAR(50)"
+        timestamp created_at "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
+    }
+
+    enquiries {
+        int id PK "SERIAL"
+        string name "VARCHAR(100)"
+        string email "VARCHAR(100)"
+        text message "TEXT"
+        timestamp created_at "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
+    }
+```
+
+---
+
+## 🔄 Data Flow & Request Lifecycle
+
+This sequence diagram illustrates how a student authenticates, accesses attendance metrics, and loads circulars from PostgreSQL.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as Student / Visitor
+    participant Browser as React SPA (Port 5173)
+    participant Service as services/api.js
+    participant Flask as Flask Server (Port 5000)
+    participant Security as Werkzeug Scrypt
+    participant DB as PostgreSQL Database
+
+    User->>Browser: Enters Roll No (SCH202601) & Password
+    Browser->>Service: loginStudent(roll, password)
+    Service->>Flask: POST /api/login { roll_number, password }
+    Flask->>DB: SELECT id, password_hash FROM students WHERE roll_number = %s
+    DB-->>Flask: Returns hashed record
+    Flask->>Security: check_password_hash(hash, input_password)
+    Security-->>Flask: Verification True
+    Flask-->>Service: HTTP 200 { success: true, student: {...} }
+    Service-->>Browser: Store profile in localStorage
+    Browser->>User: Renders Student Dashboard
+
+    par Fetch Academic Results
+        Browser->>Flask: GET /api/student/results?student_id=1
+        Flask->>DB: SELECT * FROM results WHERE student_id = 1
+        DB-->>Flask: Subject rows
+        Flask-->>Browser: JSON { marks, percentage, grade }
+    and Fetch Attendance
+        Browser->>Flask: GET /api/student/attendance?student_id=1
+        Flask->>DB: SELECT * FROM attendance WHERE student_id = 1
+        DB-->>Flask: Attendance row
+        Flask-->>Browser: JSON { total_days, present_days, percentage }
+    end
+```
+
+---
+
+## 🌟 Key Features & Modules
+
+### 1. Public Institutional Portal
+- **Collapsible Navigation Drawer**: Accessible on all screen sizes with smooth slide animation, backdrop blur overlay, and keyboard accessibility (`Escape` key close).
+- **Home Page**: Hero showcase, Principal’s welcome letter, key educational pillars, academic highlights, campus facilities, dynamic announcements, and upcoming events calendar.
+- **About Us**: Institution profile (established 1948), CBSE accreditation, Vision, Mission, and historical timeline from founding to present.
+- **Academics**: Interactive stream switcher (**Science / PCM-PCB**, **Commerce & Finance**, **Humanities & Liberal Arts**) with detailed subject lists and career trajectories.
+- **Facilities Showcase**: Photo cards with feature tags highlighting the Great Library, modern Science Laboratories, Turing Computer Center, Sports Grounds, and Smart Classrooms.
+- **Live Notice Board**: Real-time announcements fetched from PostgreSQL with category pills (*Academic, Event, Sports, General*) and dynamic keyword search filtering.
+- **Contact & Admissions**: Campus visiting hours, telephone helpline, embedded interactive map, and a functional admission enquiry form that writes to the database.
+
+### 2. Authenticated Student Portal
+- **Secure Authentication**: Roll Number and Password verification using cryptographic Scrypt hashes.
+- **Student Profile**: Roll Number, Class, Section, and Academic Session.
+- **Attendance Tracker**: Visual progress bar, percentage indicator, working/present/absent day count, and board exam eligibility status.
+- **Subject-Wise Results Table**: Subject descriptions, marks scored, maximum marks, individual subject performance badges, and cumulative term grade.
+- **One-Click Demo Evaluator**: Preset login quick-fill buttons for test evaluation and presentations.
+
+---
+
+## 🎨 Design System — "The Heritage Edit"
+
+| Color Tone | Hex Code | Purpose |
+|:---|:---|:---|
+| **Warm Ivory** | `#F8F5EE` | Primary page background; eliminates visual eye strain |
+| **Deep Burgundy** | `#713B37` | Primary action buttons, badges, and key accents |
+| **Forest Green** | `#35483A` | Contrasting institutional sections and banner highlights |
+| **Antique Gold** | `#B68A50` | Crest accents, card borders, and sub-headings |
+| **Charcoal** | `#2A2824` | High-contrast editorial typography and footer background |
+
+- **Typography**: Google Fonts pairing — **Playfair Display** (Headings) + **Inter** (Body text & navigation).
+
+---
+
+## 💻 Technology Stack
+
+```
+Frontend:
+  ├── React 18
+  ├── Vite (Lightning build & HMR)
+  ├── React Router DOM v7
+  ├── Lucide React (Clean feather icons)
+  └── Vanilla CSS (Modern CSS Custom Properties)
+
+Backend:
+  ├── Python 3.9+
+  ├── Flask 3.x (WSGI Micro-framework)
+  ├── Flask-CORS (Cross-Origin Policy Middleware)
+  ├── psycopg2-binary (PostgreSQL Driver)
+  ├── python-dotenv (Environment config)
+  └── Werkzeug Security (Scrypt password hashing)
+
+Database:
+  └── PostgreSQL 14+ (Relational SQL Engine)
+```
+
+---
+
+## 📁 Project Directory Structure
+
+```
+school-portal/
+├── backend/
+│   ├── app.py              # Main Flask REST API application
+│   ├── database.py         # PostgreSQL connection manager & DDL executor
+│   ├── init_db.py          # Database setup and seed utility script
+│   ├── schema.sql          # Relational SQL table definitions
+│   ├── seed.sql            # Starter institutional seed data & scrypt hashes
+│   ├── requirements.txt    # Python dependencies
+│   ├── .env                # Local database configuration
+│   └── .env.example        # Configuration template
+│
+├── frontend/
+│   ├── public/
+│   │   ├── logo.svg        # Custom heritage collegiate seal
+│   │   └── favicon.svg
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── Navbar.jsx          # Always-accessible navigation & slide-in drawer
+│   │   │   ├── Footer.jsx          # Institutional footer & campus contacts
+│   │   │   ├── NoticeCard.jsx      # Modular announcement card with category badges
+│   │   │   └── FacilityCard.jsx    # Photo showcase card with hover transitions
+│   │   ├── pages/
+│   │   │   ├── Home.jsx            # Editorial homepage
+│   │   │   ├── About.jsx           # Vision, history timeline & achievements
+│   │   │   ├── Academics.jsx       # Stream tab switcher & teaching methodology
+│   │   │   ├── Facilities.jsx      # Campus infrastructure showcase
+│   │   │   ├── Notices.jsx         # Live circulars with search & category filters
+│   │   │   ├── Contact.jsx         # Contact info & functional enquiry form
+│   │   │   ├── StudentLogin.jsx    # Student authentication with demo autofill
+│   │   │   └── StudentDashboard.jsx# Attendance meter & subject marks breakdown
+│   │   ├── services/
+│   │   │   └── api.js              # Centralized fetch API methods with fallbacks
+│   │   ├── App.jsx                 # Routing configuration
+│   │   ├── index.css               # Heritage design system styles
+│   │   └── main.jsx                # React DOM entrypoint
+│   ├── package.json
+│   └── vite.config.js
+│
+├── .gitignore
+└── README.md
+```
+
+---
+
+## 🚀 Installation & Quick Start
+
+### 1. Prerequisites
+- **Node.js** (v18+) & **npm**
+- **Python** (v3.9+)
+- **PostgreSQL** running locally on port `5432`
+
+### 2. Database Setup
 ```bash
 cd backend
+
+# Initialize database, create tables, and populate sample records
 python init_db.py
 ```
-*This automatically creates the `schoolhub` database, executes `schema.sql`, and seeds sample student, notice, and results data.*
 
-### 2. Run Flask Backend
+### 3. Start Flask Backend
 ```bash
 cd backend
 python app.py
 ```
-*API starts at `http://localhost:5000`.*
+*API server starts at `http://localhost:5000`.*
 
-### 3. Run React Frontend
-In a separate terminal:
+### 4. Start React Frontend
+In a separate terminal window:
 ```bash
 cd frontend
 npm install
@@ -124,48 +309,34 @@ npm run dev
 
 ---
 
-## 5. REST API Endpoints
+## 📡 REST API Reference
 
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/api/health` | Backend and database connectivity status |
-| `GET` | `/api/notices` | All notices (optional filter: `?category=Academic`) |
-| `GET` | `/api/notices/latest` | Latest 4 notices for the homepage |
-| `POST` | `/api/contact` | Submits enquiry to `enquiries` table |
-| `POST` | `/api/login` | Authenticates student roll number & password |
-| `GET` | `/api/student/profile` | Student profile info (`?student_id=1`) |
-| `GET` | `/api/student/results` | Subject marks, percentage & grade (`?student_id=1`) |
-| `GET` | `/api/student/attendance` | Attendance days, percentage & eligibility |
+| Method | Endpoint | Description | Query / Payload |
+|---|---|---|---|
+| `GET` | `/api/health` | Diagnostics & DB health check | None |
+| `GET` | `/api/notices` | All notices with optional filtering | `?category=Academic` |
+| `GET` | `/api/notices/latest` | Latest 4 notices for the homepage | None |
+| `POST` | `/api/contact` | Submits enquiry into `enquiries` table | `{"name":"...","email":"...","message":"..."}` |
+| `POST` | `/api/login` | Authenticates student roll number & password | `{"roll_number":"...","password":"..."}` |
+| `GET` | `/api/student/profile` | Student profile info | `?student_id=1` |
+| `GET` | `/api/student/results` | Subject marks, percentage & grades | `?student_id=1` |
+| `GET` | `/api/student/attendance` | Attendance statistics & exam eligibility | `?student_id=1` |
 
-### Demo Student Login Credentials
-- **Student 1**: Roll `SCH202601` | Password `password123` *(Alexander Vance, 93.3% Attendance)*
-- **Student 2**: Roll `SCH202602` | Password `password123` *(Sophia Montgomery, 96.7% Attendance)*
-- **Student 3**: Roll `SCH202603` | Password `password123` *(Ethan Hawthorne, 88.3% Attendance)*
-
-*(A convenient one-click demo autofill button is available on the Student Login page for examination evaluation.)*
-
----
-
-## 6. Group Member Contributions (5 Students)
-
-- **Student 1 (Frontend Lead & Homepage)**: Design system, `Navbar.jsx` with responsive collapsible drawer, `Home.jsx`, branding, and CSS.
-- **Student 2 (Content & Info Pages)**: `About.jsx`, `Academics.jsx` (stream switcher), `Facilities.jsx`, and `Footer.jsx`.
-- **Student 3 (Backend API Development)**: Flask REST API (`app.py`), Werkzeug password verification, CORS middleware, and input validation.
-- **Student 4 (Database Architecture)**: PostgreSQL `schema.sql`, sample `seed.sql`, connection handling in `database.py`, and SQL queries.
-- **Student 5 (Student Portal & Integration)**: `StudentLogin.jsx`, `StudentDashboard.jsx`, API fetch service (`api.js`), and test documentation.
+### Sample Login Credentials
+| Student Name | Roll Number | Password | Attendance | Marks Aggregate |
+|:---|:---|:---|:---|:---|
+| **Alexander Vance** | `SCH202601` | `password123` | **93.3%** (168/180 days) | **92.67%** (A+ Distinction) |
+| **Sophia Montgomery** | `SCH202602` | `password123` | **96.7%** (174/180 days) | **95.67%** (A+ Distinction) |
+| **Ethan Hawthorne** | `SCH202603` | `password123` | **88.3%** (159/180 days) | **87.25%** (A Excellent) |
 
 ---
 
-## 7. Key Viva Exam Questions & Answers
+## 👥 Group Member Contributions
 
-1. **Why use Werkzeug password hashing instead of storing plain passwords?**  
-   *Answer*: Plaintext storage is a major vulnerability. Werkzeug uses the cryptographic `scrypt` hashing algorithm with unique salts so passwords cannot be decrypted even if the database is exposed.
-
-2. **How does the project prevent SQL Injection?**  
-   *Answer*: All database queries in `app.py` utilize `psycopg2` parameterized queries with `%s` placeholders rather than string formatting or concatenation.
-
-3. **What is the role of Flask-CORS?**  
-   *Answer*: Since the React frontend runs on `localhost:5173` and Flask runs on `localhost:5000`, browser security blocks requests by default. CORS allows the browser to communicate safely across different origins.
-
-4. **How does client-side routing differ from server-side routing?**  
-   *Answer*: React Router swaps components dynamically inside the DOM using the browser's History API without making full-page reloads to the server.
+| Member | Module & Responsibilities | Key Deliverables |
+|:---|:---|:---|
+| **Student 1** | **Frontend Lead & Homepage** | Heritage design system, `Navbar.jsx` with slide-in drawer, `Home.jsx`, and branding |
+| **Student 2** | **Informational Pages** | `About.jsx` (Timeline & Vision), `Academics.jsx` (Stream selector), `Facilities.jsx`, `Footer.jsx` |
+| **Student 3** | **Flask Backend API** | REST API endpoints (`app.py`), Werkzeug password hashing, CORS, and input validation |
+| **Student 4** | **Database Architecture** | PostgreSQL DDL (`schema.sql`), sample `seed.sql`, and database connection logic |
+| **Student 5** | **Student Portal & Integration** | `StudentLogin.jsx`, `StudentDashboard.jsx`, API fetch service (`api.js`), and test suite |
