@@ -32,11 +32,8 @@ The application uses a standard 3-tier web architecture:
 
 ```mermaid
 flowchart LR
-    A["🖥️ Frontend (React + Vite)\n• Pages & Components\n• Collapsible Side Drawer\n• Student Portal UI"] 
-    <-->|HTTP JSON REST API| 
-    B["⚙️ Backend (Python Flask)\n• REST API Endpoints\n• Werkzeug Password Hashing\n• CORS & Input Validation"]
-    <-->|SQL via psycopg2| 
-    C["🗄️ Database (PostgreSQL)\n• Students & Credentials\n• Notices & Circulars\n• Marks & Attendance\n• Enquiries"]
+    A["Frontend (React 18 + Vite)<br/>• Responsive Pages & Drawer<br/>• Student Portal Dashboard"] <--> |"HTTP / REST API (JSON)"| B["Backend (Python Flask)<br/>• REST API Endpoints<br/>• Werkzeug Password Hashing"]
+    B <--> |"SQL Queries (psycopg2)"| C["Database (PostgreSQL)<br/>• Students, Marks, Attendance<br/>• Notices & Enquiries"]
 ```
 
 ---
@@ -54,10 +51,10 @@ sequenceDiagram
     participant DB as PostgreSQL (Port 5432)
 
     User->>React: Interacts with UI (e.g. Logs in or views Notices)
-    React->>Flask: Sends fetch() request with JSON payload
-    Flask->>DB: Executes parameterized SQL query (%s)
+    React->>Flask: Sends fetch request with JSON payload
+    Flask->>DB: Executes parameterized SQL query
     DB-->>Flask: Returns query results / rows
-    Flask-->>React: Returns JSON response ({ success: true, data: [...] })
+    Flask-->>React: Returns JSON response
     React-->>User: Updates page dynamically without reloading
 ```
 
@@ -69,8 +66,8 @@ The database consists of 5 simple, related tables in PostgreSQL:
 
 ```mermaid
 erDiagram
-    STUDENTS ||--o{ RESULTS : "has"
-    STUDENTS ||--o{ ATTENDANCE : "has"
+    STUDENTS ||--o{ RESULTS : has
+    STUDENTS ||--o{ ATTENDANCE : has
     
     STUDENTS {
         int id PK
