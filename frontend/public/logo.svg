@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <radialGradient id="sealGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#8E4A44" />
+      <stop offset="100%" stop-color="#562926" />
+    </radialGradient>
+  </defs>
+  <!-- Outer Rim with Antique Gold -->
+  <circle cx="50" cy="50" r="46" fill="url(#sealGrad)" stroke="#C39A62" stroke-width="3" />
+  <circle cx="50" cy="50" r="41" fill="none" stroke="#C39A62" stroke-width="1" stroke-dasharray="2,2" />
+  
+  <!-- Shield outline -->
+  <path d="M 50 20 Q 64 20 68 30 C 68 52 50 64 50 72 C 50 64 32 52 32 30 Q 36 20 50 20 Z" 
+        fill="#35483A" stroke="#C39A62" stroke-width="2" />
+        
+  <!-- Academic Open Book & Torch inside shield -->
+  <!-- Torch stem -->
+  <line x1="50" y1="32" x2="50" y2="46" stroke="#C39A62" stroke-width="2" stroke-linecap="round" />
+  <!-- Flame -->
+  <path d="M 50 25 C 52 28 54 30 52 33 C 50 35 48 33 50 25 Z" fill="#F5F0E7" stroke="#C39A62" stroke-width="1"/>
+  
+  <!-- Book Pages -->
+  <path d="M 40 48 Q 50 46 50 51 Q 50 46 60 48 L 59 55 Q 50 53 50 57 Q 50 53 41 55 Z" fill="#F5F0E7" stroke="#C39A62" stroke-width="1.2" />
+
+  <!-- Founded year banner -->
+  <rect x="36" y="75" width="28" height="9" rx="2" fill="#713B37" stroke="#C39A62" stroke-width="1" />
+  <text x="50" y="82" font-family="'Playfair Display', Georgia, serif" font-size="6.5" font-weight="bold" fill="#F5F0E7" text-anchor="middle" letter-spacing="1">1948</text>
+</svg>
+
