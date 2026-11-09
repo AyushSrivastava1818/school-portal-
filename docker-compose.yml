@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  # 1. Database Service (PostgreSQL)
+  database:
+    image: postgres:14-alpine
+    container_name: schoolhub-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: schoolhub
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # Automatically initializes schema and seeds sample student accounts on first startup
+      - ./backend/schema.sql:/docker-entrypoint-initdb.d/1-schema.sql
+      - ./backend/seed.sql:/docker-entrypoint-initdb.d/2-seed.sql
+    networks:
+      - schoolhub-network
+
+  # 2. Backend Service (Flask API)
+  backend:
+    build: ./backend
+    container_name: schoolhub-backend
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=production
+      - DB_HOST=database
+      - DB_NAME=schoolhub
+      - DB_USER=postgres
+      - DB_PASSWORD=password123
+    depends_on:
+      - database
+    networks:
+      - schoolhub-network
+
+  # 3. Frontend Service (React + Nginx)
+  frontend:
+    build: ./frontend
+    container_name: schoolhub-frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+    networks:
+      - schoolhub-network
+
+networks:
+  schoolhub-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
