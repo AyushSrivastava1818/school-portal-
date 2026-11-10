@@ -29,6 +29,16 @@ export default function StudentDashboard() {
     }
 
     const currentStudent = JSON.parse(saved);
+
+    currentStudent.id = currentStudent.id ??
+    currentStudent.student_id;
+
+    if(!currentStudent.id){
+      setError("Student Id missing. Please login again.");
+      return;
+    }
+
+    
     setStudent(currentStudent);
 
     async function fetchDashboardMetrics() {

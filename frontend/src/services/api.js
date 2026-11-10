@@ -109,6 +109,7 @@ export async function loginStudent(rollNumber, password) {
   try {
     const response = await fetch(`${API_BASE_URL}/login`, {
       method: 'POST',
+      credentials:'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ roll_number: rollNumber, password }),
       signal: AbortSignal.timeout(5000),
@@ -155,21 +156,12 @@ export async function getStudentResults(studentId) {
   try {
     const response = await fetch(`${API_BASE_URL}/student/results?student_id=${studentId}`, {
       signal: AbortSignal.timeout(4000),
+      credentials:'include',
     });
     return await handleResponse(response);
-  } catch {
-    return {
-      success: true,
-      data: [
-        { id: 1, subject: 'Advanced Mathematics', marks: 94.0, total_marks: 100 },
-        { id: 2, subject: 'Physics (Theory & Lab)', marks: 89.5, total_marks: 100 },
-        { id: 3, subject: 'Chemistry', marks: 91.0, total_marks: 100 },
-        { id: 4, subject: 'English Literature', marks: 95.0, total_marks: 100 },
-        { id: 5, subject: 'Computer Science', marks: 98.0, total_marks: 100 },
-        { id: 6, subject: 'World History', marks: 88.5, total_marks: 100 },
-      ],
-      summary: { total_obtained: 556, total_maximum: 600, percentage: 92.67, grade: 'A+ (Distinction)' },
-    };
+  } catch(error){
+    console.error('Results API error:',error);
+    throw error ;
   }
 }
 
@@ -180,19 +172,11 @@ export async function getStudentAttendance(studentId) {
   try {
     const response = await fetch(`${API_BASE_URL}/student/attendance?student_id=${studentId}`, {
       signal: AbortSignal.timeout(4000),
+      credentials:'include',
     });
     return await handleResponse(response);
-  } catch {
-    return {
-      success: true,
-      data: {
-        total_days: 180,
-        present_days: 168,
-        absent_days: 12,
-        percentage: 93.3,
-        is_eligible_for_exams: true,
-        status: 'Satisfactory',
-      },
-    };
+  } catch(error){
+    console.error('Attendence API error:',error);
+    throw error ;
   }
 }

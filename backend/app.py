@@ -305,7 +305,7 @@ def get_student_profile():
     Retrieves student identity details.
     Accepts 'student_id' via query param: /api/student/profile?student_id=1
     """
-    student_id = request.args.get("student_id") or session.get("student_id")
+    student_id = session.get("student_id")
 
     if not student_id:
         return jsonify({"success": False, "message": "Student ID parameter is required."}), 400
@@ -348,7 +348,7 @@ def get_student_results():
     """
     Retrieves subject-wise marks and computes overall percentage and performance.
     """
-    student_id = request.args.get("student_id") or session.get("student_id")
+    student_id = session.get("student_id")
 
     if not student_id:
         return jsonify({"success": False, "message": "Student ID parameter is required."}), 400
